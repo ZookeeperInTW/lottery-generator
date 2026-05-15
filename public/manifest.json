@@ -1,0 +1,22 @@
+{
+  "name": "大樂透號碼產生器",
+  "short_name": "大樂透",
+  "description": "隨機產生不重複於歷史開獎紀錄的大樂透號碼",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1a1a2e",
+  "theme_color": "#e63946",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
