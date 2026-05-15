@@ -15,8 +15,8 @@ export const metadata: Metadata = {
     title: "大樂透",
   },
   icons: {
-    icon: "/icons/icon-192x192.png",
-    apple: "/icons/icon-192x192.png",
+    icon: "/favicon.png",
+    apple: "/icons/icon-180x180.png",
   },
 };
 
