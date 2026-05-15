@@ -21,13 +21,6 @@ export default function LotteryApp() {
   const [error, setError] = useState<string | null>(null);
   const [animating, setAnimating] = useState(false);
 
-  // 初始化：從 localStorage 讀取
-  useEffect(() => {
-    const saved = loadFromStorage();
-    if (saved) setHistoryState(saved);
-    setGenerated(loadGenerated());
-  }, []);
-
   // 從台彩抓取最新資料
   const fetchLatest = useCallback(async () => {
     setFetching(true);
@@ -49,6 +42,17 @@ export default function LotteryApp() {
       setFetching(false);
     }
   }, []);
+
+  // 初始化：從 localStorage 讀取，若無資料則自動從 Supabase 載入
+  useEffect(() => {
+    const saved = loadFromStorage();
+    setGenerated(loadGenerated());
+    if (saved) {
+      setHistoryState(saved);
+    } else {
+      fetchLatest();
+    }
+  }, [fetchLatest]);
 
   // 產生號碼
   const generate = useCallback(() => {
