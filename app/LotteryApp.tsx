@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import CheckNumbers from "./CheckNumbers";
 import {
   buildHistorySet,
   generateUniqueNumbers,
@@ -13,7 +14,10 @@ import {
   type GeneratedEntry,
 } from "@/lib/lottery";
 
+type Tab = "random" | "check";
+
 export default function LotteryApp() {
+  const [tab, setTab] = useState<Tab>("random");
   const [historyState, setHistoryState] = useState<LotteryState | null>(null);
   const [generated, setGenerated] = useState<GeneratedEntry[]>([]);
   const [loading, setLoading] = useState(false);
@@ -21,7 +25,7 @@ export default function LotteryApp() {
   const [error, setError] = useState<string | null>(null);
   const [animating, setAnimating] = useState(false);
 
-  // 從台彩抓取最新資料
+  // 從 Supabase 抓取最新資料
   const fetchLatest = useCallback(async () => {
     setFetching(true);
     setError(null);
@@ -57,13 +61,11 @@ export default function LotteryApp() {
   // 產生號碼
   const generate = useCallback(() => {
     if (!historyState) {
-      setError("請先點擊「更新資料」載入歷史開獎紀錄");
+      setError("歷史資料載入中，請稍候…");
       return;
     }
     setLoading(true);
     setAnimating(false);
-
-    // 用 setTimeout 讓動畫重設
     setTimeout(() => {
       const historySet = buildHistorySet(historyState.records);
       const nums = generateUniqueNumbers(historySet);
@@ -77,7 +79,7 @@ export default function LotteryApp() {
         numbers: nums,
         generatedAt: new Date().toISOString(),
       };
-      const updated = [entry, ...generated].slice(0, 20); // 最多保留 20 筆
+      const updated = [entry, ...generated].slice(0, 20);
       setGenerated(updated);
       saveGenerated(updated);
       setAnimating(true);
@@ -95,21 +97,19 @@ export default function LotteryApp() {
           <span className="text-2xl">🎱</span>
           <h1 className="text-lg font-bold tracking-tight">大樂透產生器</h1>
         </div>
-        <Link
-          href="/history"
-          className="text-sm text-gray-400 hover:text-white transition-colors"
-        >
+        <Link href="/history" className="text-sm text-gray-400 hover:text-white transition-colors">
           開獎紀錄 →
         </Link>
       </header>
 
-      <main className="flex-1 flex flex-col items-center px-4 py-8 gap-6 max-w-lg mx-auto w-full">
+      <main className="flex-1 flex flex-col items-center px-4 py-6 gap-5 max-w-lg mx-auto w-full">
+
         {/* 狀態列 */}
-        <div className="w-full rounded-xl bg-[#1a1a2e] border border-[#2a2a4a] p-4 flex items-center justify-between">
+        <div className="w-full rounded-xl bg-[#1a1a2e] border border-[#2a2a4a] p-3.5 flex items-center justify-between">
           <div>
-            <p className="text-xs text-gray-400">歷史開獎筆數</p>
-            <p className="text-xl font-bold text-white">
-              {historyState ? historyState.records.length.toLocaleString() : "—"}
+            <p className="text-xs text-gray-400">比對歷史筆數</p>
+            <p className="text-lg font-bold text-white">
+              {historyState ? historyState.records.length.toLocaleString() : "載入中…"}
             </p>
             {historyState && (
               <p className="text-xs text-gray-500 mt-0.5">
@@ -122,11 +122,9 @@ export default function LotteryApp() {
             disabled={fetching}
             className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg bg-[#2a2a4a] hover:bg-[#3a3a5a] transition-colors disabled:opacity-50"
           >
-            {fetching ? (
-              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full spin-slow" />
-            ) : (
-              <span>↻</span>
-            )}
+            {fetching
+              ? <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full spin-slow" />
+              : <span>↻</span>}
             {fetching ? "更新中…" : "更新資料"}
           </button>
         </div>
@@ -138,85 +136,102 @@ export default function LotteryApp() {
           </div>
         )}
 
-        {/* 號碼球顯示區 */}
-        <div className="w-full rounded-2xl bg-[#1a1a2e] border border-[#2a2a4a] p-6 flex flex-col items-center gap-4">
-          <p className="text-xs text-gray-400 uppercase tracking-widest">本次號碼</p>
-
-          <div className="flex gap-3 flex-wrap justify-center">
-            {latest ? (
-              latest.numbers.map((n, i) => (
-                <LotteryBall
-                  key={`${latest.id}-${n}`}
-                  number={n}
-                  delay={i * 80}
-                  animate={animating}
-                />
-              ))
-            ) : (
-              Array.from({ length: 6 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="w-14 h-14 rounded-full bg-[#2a2a4a] border-2 border-[#3a3a5a]"
-                />
-              ))
-            )}
-          </div>
-
-          {latest && (
-            <p className="text-xs text-gray-500">
-              {new Date(latest.generatedAt).toLocaleString("zh-TW")}
-            </p>
-          )}
+        {/* Tab 切換 */}
+        <div className="w-full flex rounded-xl bg-[#1a1a2e] border border-[#2a2a4a] p-1">
+          <TabButton active={tab === "random"} onClick={() => setTab("random")}>
+            🎲 隨機選號
+          </TabButton>
+          <TabButton active={tab === "check"} onClick={() => setTab("check")}>
+            🔍 自選查詢
+          </TabButton>
         </div>
 
-        {/* 產生按鈕 */}
-        <button
-          onClick={generate}
-          disabled={loading || fetching}
-          className="w-full py-4 rounded-2xl text-lg font-bold tracking-wide transition-all
-            bg-gradient-to-r from-[#e63946] to-[#c1121f]
-            hover:from-[#ff4d5a] hover:to-[#e63946]
-            active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
-            shadow-lg shadow-red-900/30"
-        >
-          {loading ? "產生中…" : "🎲 隨機選號"}
-        </button>
-
-        {/* 警語 */}
-        <p className="text-xs text-gray-600 text-center">
-          此工具確保產生的號碼組合與所有歷史開獎紀錄不重複
-          <br />
-          投注前請確認個人財務狀況，理性購彩
-        </p>
-
-        {/* 近期產生紀錄 */}
-        {generated.length > 1 && (
-          <div className="w-full">
-            <p className="text-xs text-gray-400 mb-2 uppercase tracking-widest">
-              近期產生紀錄
-            </p>
-            <div className="flex flex-col gap-2">
-              {generated.slice(1, 6).map((entry) => (
-                <div
-                  key={entry.id}
-                  className="rounded-xl bg-[#1a1a2e] border border-[#2a2a4a] px-4 py-3 flex items-center justify-between"
-                >
-                  <div className="flex gap-2">
-                    {entry.numbers.map((n) => (
-                      <span
-                        key={n}
-                        className="text-sm font-mono font-bold text-gray-300 w-6 text-center"
-                      >
-                        {String(n).padStart(2, "0")}
-                      </span>
-                    ))}
-                  </div>
-                  <span className="text-xs text-gray-600">
-                    {new Date(entry.generatedAt).toLocaleDateString("zh-TW")}
-                  </span>
-                </div>
-              ))}
+        {/* ── 隨機選號頁 ── */}
+        {tab === "random" && (
+          <>
+            {/* 號碼球顯示區 */}
+            <div className="w-full rounded-2xl bg-[#1a1a2e] border border-[#2a2a4a] p-6 flex flex-col items-center gap-4">
+              <p className="text-xs text-gray-400 uppercase tracking-widest">本次號碼</p>
+              <div className="flex gap-3 flex-wrap justify-center">
+                {latest ? (
+                  latest.numbers.map((n, i) => (
+                    <LotteryBall
+                      key={`${latest.id}-${n}`}
+                      number={n}
+                      delay={i * 80}
+                      animate={animating}
+                    />
+                  ))
+                ) : (
+                  Array.from({ length: 6 }).map((_, i) => (
+                    <div key={i} className="w-14 h-14 rounded-full bg-[#2a2a4a] border-2 border-[#3a3a5a]" />
+                  ))
+                )}
+              </div>
+              {latest && (
+                <p className="text-xs text-gray-500">
+                  {new Date(latest.generatedAt).toLocaleString("zh-TW")}
+                </p>
+              )}
             </div>
+
+            <button
+              onClick={generate}
+              disabled={loading || fetching || !historyState}
+              className="w-full py-4 rounded-2xl text-lg font-bold tracking-wide transition-all
+                bg-gradient-to-r from-[#e63946] to-[#c1121f]
+                hover:from-[#ff4d5a] hover:to-[#e63946]
+                active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed
+                shadow-lg shadow-red-900/30"
+            >
+              {loading ? "產生中…" : fetching ? "資料載入中…" : "🎲 隨機選號"}
+            </button>
+
+            <p className="text-xs text-gray-600 text-center">
+              此工具確保產生的號碼組合與所有歷史開獎紀錄不重複
+              <br />
+              投注前請確認個人財務狀況，理性購彩
+            </p>
+
+            {/* 近期產生紀錄 */}
+            {generated.length > 1 && (
+              <div className="w-full">
+                <p className="text-xs text-gray-400 mb-2 uppercase tracking-widest">近期產生紀錄</p>
+                <div className="flex flex-col gap-2">
+                  {generated.slice(1, 6).map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="rounded-xl bg-[#1a1a2e] border border-[#2a2a4a] px-4 py-3 flex items-center justify-between"
+                    >
+                      <div className="flex gap-2">
+                        {entry.numbers.map((n) => (
+                          <span key={n} className="text-sm font-mono font-bold text-gray-300 w-6 text-center">
+                            {String(n).padStart(2, "0")}
+                          </span>
+                        ))}
+                      </div>
+                      <span className="text-xs text-gray-600">
+                        {new Date(entry.generatedAt).toLocaleDateString("zh-TW")}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── 自選查詢頁 ── */}
+        {tab === "check" && (
+          <div className="w-full rounded-2xl bg-[#1a1a2e] border border-[#2a2a4a] p-4">
+            {historyState ? (
+              <CheckNumbers records={historyState.records} />
+            ) : (
+              <div className="flex flex-col items-center gap-3 py-10 text-gray-500">
+                <span className="inline-block w-6 h-6 border-2 border-gray-500 border-t-transparent rounded-full spin-slow" />
+                <p className="text-sm">歷史資料載入中…</p>
+              </div>
+            )}
           </div>
         )}
       </main>
@@ -224,20 +239,34 @@ export default function LotteryApp() {
   );
 }
 
-function LotteryBall({
-  number,
-  delay,
-  animate,
+function TabButton({
+  active,
+  onClick,
+  children,
 }: {
-  number: number;
-  delay: number;
-  animate: boolean;
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
 }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${
+        active
+          ? "bg-[#2a2a4a] text-white shadow"
+          : "text-gray-500 hover:text-gray-300"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function LotteryBall({ number, delay, animate }: { number: number; delay: number; animate: boolean }) {
   const color = getBallColor(number);
   return (
     <div
-      className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg shadow-lg
-        ${animate ? "ball-animate" : ""}`}
+      className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg shadow-lg ${animate ? "ball-animate" : ""}`}
       style={{
         background: color.bg,
         color: color.text,
