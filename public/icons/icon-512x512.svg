@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <!-- 背景漸層 -->
+    <radialGradient id="bg" cx="50%" cy="45%" r="60%">
+      <stop offset="0%" stop-color="#26264a"/>
+      <stop offset="100%" stop-color="#0a0a18"/>
+    </radialGradient>
+    <!-- 紅球漸層 -->
+    <radialGradient id="r1" cx="35%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#ff7b85"/>
+      <stop offset="100%" stop-color="#c1121f"/>
+    </radialGradient>
+    <!-- 橙球漸層 -->
+    <radialGradient id="r2" cx="35%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#ffcb8e"/>
+      <stop offset="100%" stop-color="#e07a20"/>
+    </radialGradient>
+    <!-- 青球漸層 -->
+    <radialGradient id="r3" cx="35%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#5de6d8"/>
+      <stop offset="100%" stop-color="#1a7a70"/>
+    </radialGradient>
+    <!-- 藍球漸層 -->
+    <radialGradient id="r4" cx="35%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#7bb8d8"/>
+      <stop offset="100%" stop-color="#2d5f80"/>
+    </radialGradient>
+    <!-- 紫球漸層 -->
+    <radialGradient id="r5" cx="35%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="100%" stop-color="#5b21b6"/>
+    </radialGradient>
+    <!-- 金色球漸層（特別號） -->
+    <radialGradient id="rg" cx="35%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#ffe566"/>
+      <stop offset="100%" stop-color="#b8860b"/>
+    </radialGradient>
+    <!-- 外圈光暈 -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <!-- 球體陰影 -->
+    <filter id="shadow">
+      <feDropShadow dx="3" dy="5" stdDeviation="6" flood-color="#00000060"/>
+    </filter>
+    <!-- 裁切圓形 -->
+    <clipPath id="circle"><circle cx="256" cy="256" r="256"/></clipPath>
+  </defs>
+
+  <!-- 背景圓形 -->
+  <circle cx="256" cy="256" r="256" fill="url(#bg)"/>
+
+  <!-- 裝飾：外圈星點 -->
+  <circle cx="61.44" cy="92.16" r="3.264728869244491" fill="white" opacity="0.21038376746489593"/>
+  <circle cx="450.56" cy="71.68" r="3.1007757539371177" fill="white" opacity="0.3134853414621922"/>
+  <circle cx="30.72" cy="317.44" r="3.0262359226284854" fill="white" opacity="0.45929962379609335"/>
+  <circle cx="481.28" cy="368.64" r="2.598438160984177" fill="white" opacity="0.3096324878254091"/>
+  <circle cx="112.64" cy="450.56" r="3.021147746246619" fill="white" opacity="0.3291212001478492"/>
+  <circle cx="399.36" cy="460.8" r="2.9797187019047255" fill="white" opacity="0.2353446234079057"/>
+  <circle cx="256" cy="40.96" r="3.171359172677568" fill="white" opacity="0.2673487108309517"/>
+
+  <!-- 球座配置（5球扇形排列 + 1特別號） -->
+  <!-- 上排：3球 -->
+  
+  <!-- 光暈 -->
+  <circle cx="143.36" cy="174.08" r="99.2" fill="#e6394650" opacity="0.6"/>
+  <!-- 球體 -->
+  <circle cx="143.36" cy="174.08" r="79.36" fill="url(#r1)" filter="url(#shadow)"/>
+  <!-- 高光 -->
+  <ellipse cx="127.48800000000001" cy="151.85920000000002" rx="27.776" ry="17.4592" fill="white" opacity="0.35"/>
+  <!-- 號碼 -->
+  <text x="143.36" y="194.650112" text-anchor="middle"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="57.139199999999995" font-weight="900" fill="white"
+    paint-order="stroke" stroke="rgba(0,0,0,0.3)" stroke-width="4.7616">07</text>
+  
+  <!-- 光暈 -->
+  <circle cx="256" cy="128" r="99.2" fill="#f4a26150" opacity="0.6"/>
+  <!-- 球體 -->
+  <circle cx="256" cy="128" r="79.36" fill="url(#r2)" filter="url(#shadow)"/>
+  <!-- 高光 -->
+  <ellipse cx="240.128" cy="105.7792" rx="27.776" ry="17.4592" fill="white" opacity="0.35"/>
+  <!-- 號碼 -->
+  <text x="256" y="148.570112" text-anchor="middle"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="57.139199999999995" font-weight="900" fill="white"
+    paint-order="stroke" stroke="rgba(0,0,0,0.3)" stroke-width="4.7616">19</text>
+  
+  <!-- 光暈 -->
+  <circle cx="368.64" cy="174.08" r="99.2" fill="#2a9d8f50" opacity="0.6"/>
+  <!-- 球體 -->
+  <circle cx="368.64" cy="174.08" r="79.36" fill="url(#r3)" filter="url(#shadow)"/>
+  <!-- 高光 -->
+  <ellipse cx="352.768" cy="151.85920000000002" rx="27.776" ry="17.4592" fill="white" opacity="0.35"/>
+  <!-- 號碼 -->
+  <text x="368.64" y="194.650112" text-anchor="middle"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="57.139199999999995" font-weight="900" fill="white"
+    paint-order="stroke" stroke="rgba(0,0,0,0.3)" stroke-width="4.7616">28</text>
+  <!-- 下排：2球 -->
+  
+  <!-- 光暈 -->
+  <circle cx="181.76" cy="294.4" r="99.2" fill="#457b9d50" opacity="0.6"/>
+  <!-- 球體 -->
+  <circle cx="181.76" cy="294.4" r="79.36" fill="url(#r4)" filter="url(#shadow)"/>
+  <!-- 高光 -->
+  <ellipse cx="165.88799999999998" cy="272.1792" rx="27.776" ry="17.4592" fill="white" opacity="0.35"/>
+  <!-- 號碼 -->
+  <text x="181.76" y="314.970112" text-anchor="middle"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="57.139199999999995" font-weight="900" fill="white"
+    paint-order="stroke" stroke="rgba(0,0,0,0.3)" stroke-width="4.7616">35</text>
+  
+  <!-- 光暈 -->
+  <circle cx="330.24" cy="294.4" r="99.2" fill="#9b5de550" opacity="0.6"/>
+  <!-- 球體 -->
+  <circle cx="330.24" cy="294.4" r="79.36" fill="url(#r5)" filter="url(#shadow)"/>
+  <!-- 高光 -->
+  <ellipse cx="314.368" cy="272.1792" rx="27.776" ry="17.4592" fill="white" opacity="0.35"/>
+  <!-- 號碼 -->
+  <text x="330.24" y="314.970112" text-anchor="middle"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="57.139199999999995" font-weight="900" fill="white"
+    paint-order="stroke" stroke="rgba(0,0,0,0.3)" stroke-width="4.7616">42</text>
+
+  <!-- 特別號（右下，稍小，金色虛線邊框） -->
+  
+  <!-- 特別號光暈 -->
+  <circle cx="419.84" cy="399.36" r="68.09599999999999" fill="#ffd70030" opacity="0.8"/>
+  <!-- 虛線外圈 -->
+  <circle cx="419.84" cy="399.36" r="54.476800000000004" fill="none" stroke="#ffd700" stroke-width="2.5"
+    stroke-dasharray="6 4"/>
+  <!-- 球體 -->
+  <circle cx="419.84" cy="399.36" r="48.64" fill="url(#rg)" filter="url(#shadow)"/>
+  <!-- 高光 -->
+  <ellipse cx="411.0848" cy="387.2" rx="15.5648" ry="9.728000000000002" fill="white" opacity="0.4"/>
+  <!-- 星號 -->
+  <text x="419.84" y="414.516224" text-anchor="middle"
+    font-family="system-ui, sans-serif"
+    font-size="39.8848" font-weight="900" fill="#1a1a1a">★</text>
+
+  <!-- 底部品牌文字 -->
+  <text x="256" y="478.72" text-anchor="middle"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="18" font-weight="700" letter-spacing="2"
+    fill="#ffffff60">大樂透</text>
+</svg>
