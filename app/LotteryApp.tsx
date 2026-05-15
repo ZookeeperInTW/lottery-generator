@@ -150,9 +150,9 @@ export default function LotteryApp() {
         {tab === "random" && (
           <>
             {/* 號碼球顯示區 */}
-            <div className="w-full rounded-2xl bg-[#1a1a2e] border border-[#2a2a4a] p-6 flex flex-col items-center gap-4">
+            <div className="w-full rounded-2xl bg-[#1a1a2e] border border-[#2a2a4a] p-4 flex flex-col items-center gap-4">
               <p className="text-xs text-gray-400 uppercase tracking-widest">本次號碼</p>
-              <div className="flex gap-3 flex-wrap justify-center">
+              <div className="grid grid-cols-6 gap-2 w-full">
                 {latest ? (
                   latest.numbers.map((n, i) => (
                     <LotteryBall
@@ -164,7 +164,7 @@ export default function LotteryApp() {
                   ))
                 ) : (
                   Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="w-14 h-14 rounded-full bg-[#2a2a4a] border-2 border-[#3a3a5a]" />
+                    <div key={i} className="aspect-square rounded-full bg-[#2a2a4a] border-2 border-[#3a3a5a]" />
                   ))
                 )}
               </div>
@@ -266,7 +266,7 @@ function LotteryBall({ number, delay, animate }: { number: number; delay: number
   const color = getBallColor(number);
   return (
     <div
-      className={`w-14 h-14 rounded-full flex items-center justify-center font-bold text-lg shadow-lg ${animate ? "ball-animate" : ""}`}
+      className={`w-full aspect-square rounded-full flex items-center justify-center font-bold text-base sm:text-lg shadow-lg ${animate ? "ball-animate" : ""}`}
       style={{
         background: color.bg,
         color: color.text,
