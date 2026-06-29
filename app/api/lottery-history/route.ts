@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { supabase, type DrawRecordRow } from "@/lib/supabase";
 import type { DrawRecord } from "@/lib/lottery";
 
+const PAGE = 1000;
+
 export async function GET() {
-  // 先查總筆數，再用單一請求拉取全部資料
+  // 先查總筆數，再平行拉取所有分頁
   const { count, error: countError } = await supabase
     .from("draw_records")
     .select("*", { count: "exact", head: true });
@@ -16,20 +18,33 @@ export async function GET() {
   }
 
   const total = count ?? 0;
-  const { data, error } = await supabase
-    .from("draw_records")
-    .select("*")
-    .order("draw_date", { ascending: false })
-    .range(0, total - 1);
-
-  if (error) {
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+  if (total === 0) {
+    return NextResponse.json({ success: true, count: 0, lastUpdated: new Date().toISOString(), records: [] });
   }
 
-  const allRows: DrawRecordRow[] = data ?? [];
+  const pageCount = Math.ceil(total / PAGE);
+  const pages = Array.from({ length: pageCount }, (_, i) => i);
+
+  const results = await Promise.all(
+    pages.map((i) =>
+      supabase
+        .from("draw_records")
+        .select("*")
+        .order("draw_date", { ascending: false })
+        .range(i * PAGE, (i + 1) * PAGE - 1)
+    )
+  );
+
+  for (const { error } of results) {
+    if (error) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: 500 }
+      );
+    }
+  }
+
+  const allRows: DrawRecordRow[] = results.flatMap((r) => r.data ?? []);
 
   const records: DrawRecord[] = allRows.map((r) => ({
     drawNum: r.draw_num,
