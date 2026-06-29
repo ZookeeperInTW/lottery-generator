@@ -25,21 +25,32 @@ export default function LotteryApp() {
   const [error, setError] = useState<string | null>(null);
   const [animating, setAnimating] = useState(false);
 
-  // 從 Supabase 抓取最新資料
-  const fetchLatest = useCallback(async () => {
+  // 從 Supabase 抓取最新資料（有本地資料時只拉增量）
+  const fetchLatest = useCallback(async (current: LotteryState | null = null) => {
     setFetching(true);
     setError(null);
     try {
-      const res = await fetch("/api/lottery-history");
+      const latestDate = current?.records[0]?.drawDate;
+      const url = latestDate ? `/api/lottery-history?after=${latestDate}` : "/api/lottery-history";
+      const res = await fetch(url);
       const data = await res.json();
       if (!data.success) throw new Error(data.error ?? "未知錯誤");
-      if (data.records.length === 0) throw new Error("未取得任何資料，請稍後再試");
-      const newState: LotteryState = {
-        records: data.records,
-        lastUpdated: data.lastUpdated,
-      };
-      setHistoryState(newState);
-      saveToStorage(newState);
+
+      if (data.records.length === 0 && !current) {
+        throw new Error("未取得任何資料，請稍後再試");
+      }
+
+      const merged = data.records.length > 0
+        ? { records: [...data.records, ...(current?.records ?? [])], lastUpdated: data.lastUpdated }
+        : { ...current!, lastUpdated: data.lastUpdated };
+
+      setHistoryState(merged);
+      saveToStorage(merged);
+
+      if (data.records.length === 0) {
+        setError("已是最新資料，無需更新");
+        setTimeout(() => setError(null), 3000);
+      }
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -53,8 +64,9 @@ export default function LotteryApp() {
     setGenerated(loadGenerated());
     if (saved) {
       setHistoryState(saved);
+      fetchLatest(saved);
     } else {
-      fetchLatest();
+      fetchLatest(null);
     }
   }, [fetchLatest]);
 
@@ -118,7 +130,7 @@ export default function LotteryApp() {
             )}
           </div>
           <button
-            onClick={fetchLatest}
+            onClick={() => fetchLatest(historyState)}
             disabled={fetching}
             className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg bg-[#2a2a4a] hover:bg-[#3a3a5a] transition-colors disabled:opacity-50"
           >

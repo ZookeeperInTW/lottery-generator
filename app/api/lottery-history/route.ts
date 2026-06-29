@@ -4,49 +4,47 @@ import type { DrawRecord } from "@/lib/lottery";
 
 const PAGE = 1000;
 
-export async function GET() {
-  // 先查總筆數，再平行拉取所有分頁
-  const { count, error: countError } = await supabase
-    .from("draw_records")
-    .select("*", { count: "exact", head: true });
+async function fetchAllRows(afterDate?: string): Promise<{ rows: DrawRecordRow[] | null; error: string | null }> {
+  let query = supabase.from("draw_records").select("*", { count: "exact", head: true });
+  if (afterDate) query = query.gt("draw_date", afterDate);
+  const { count, error: countError } = await query;
 
-  if (countError) {
-    return NextResponse.json(
-      { success: false, error: countError.message },
-      { status: 500 }
-    );
-  }
+  if (countError) return { rows: null, error: countError.message };
 
   const total = count ?? 0;
-  if (total === 0) {
-    return NextResponse.json({ success: true, count: 0, lastUpdated: new Date().toISOString(), records: [] });
-  }
+  if (total === 0) return { rows: [], error: null };
 
   const pageCount = Math.ceil(total / PAGE);
-  const pages = Array.from({ length: pageCount }, (_, i) => i);
-
   const results = await Promise.all(
-    pages.map((i) =>
-      supabase
+    Array.from({ length: pageCount }, (_, i) => {
+      let q = supabase
         .from("draw_records")
         .select("*")
         .order("draw_date", { ascending: false })
-        .range(i * PAGE, (i + 1) * PAGE - 1)
-    )
+        .range(i * PAGE, (i + 1) * PAGE - 1);
+      if (afterDate) q = q.gt("draw_date", afterDate);
+      return q;
+    })
   );
 
   for (const { error } of results) {
-    if (error) {
-      return NextResponse.json(
-        { success: false, error: error.message },
-        { status: 500 }
-      );
-    }
+    if (error) return { rows: null, error: error.message };
   }
 
-  const allRows: DrawRecordRow[] = results.flatMap((r) => r.data ?? []);
+  return { rows: results.flatMap((r) => r.data ?? []), error: null };
+}
 
-  const records: DrawRecord[] = allRows.map((r) => ({
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url);
+  const after = searchParams.get("after") ?? undefined;
+
+  const { rows, error } = await fetchAllRows(after);
+
+  if (error) {
+    return NextResponse.json({ success: false, error }, { status: 500 });
+  }
+
+  const records: DrawRecord[] = (rows ?? []).map((r) => ({
     drawNum: r.draw_num,
     drawDate: r.draw_date,
     numbers: [r.n1, r.n2, r.n3, r.n4, r.n5, r.n6].sort((a, b) => a - b),
