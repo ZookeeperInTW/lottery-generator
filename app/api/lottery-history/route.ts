@@ -129,16 +129,16 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const after = searchParams.get("after") ?? undefined;
 
-  // 先同步台彩最新資料
+  // 先同步台彩最新資料（失敗不中斷，繼續用既有 Supabase 資料）
   const { error: syncError } = await syncLatest();
-  if (syncError) {
-    return NextResponse.json({ success: false, error: syncError }, { status: 500 });
-  }
 
   // 再回傳增量或全量
-  const { rows, error } = await fetchAllRows(after);
-  if (error) {
-    return NextResponse.json({ success: false, error }, { status: 500 });
+  const { rows, error: fetchError } = await fetchAllRows(after);
+  if (fetchError) {
+    return NextResponse.json(
+      { success: false, error: `fetch: ${fetchError}${syncError ? ` / sync: ${syncError}` : ""}` },
+      { status: 500 }
+    );
   }
 
   const records: DrawRecord[] = (rows ?? []).map((r) => ({
